@@ -52,16 +52,16 @@ sage: zex1.monodromy_zeta()
 (t - 1)^-8 * (t + 1)^-8 * (t^2 + 1)^-17 * (t^2 - t + 1)^-9 * (t^2 + t + 1)^-9 * (t^4 - t^2 + 1)^-18
 ```
 
-You can find much more examples and explanations in the Juoyter notebook `Examples_ZetaFunctions.ipynb`.
+You can find much more examples and explanations in the Jupyter notebook [`Examples_ZetaFunctions.ipynb`](https://github.com/jviusos/ZetaFunctionsNewtonND-Sagemath/blob/main/Examples_ZetaFunctions.ipynb).
 
 ## References
 
 **[DH01]** Denef, J. and Hoornaert, K., *Newton Polyhedra and Igusa's Local Zeta Function*, 2001. [*J. Number Theory*](https://mathscinet.ams.org/mathscinet/search/journaldoc.html?id=3003) [89](https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=193003) [(2001),](https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=193003) [no. 1,](https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=193003) 31–64.
-    
+
 **[DL92]** Denef, J. and Loeser, F., *Caracteristiques d'Euler-Poincare, fonctions zeta locales et modifications analytiques*, [*J. Amer. Math. Soc.*](https://mathscinet.ams.org/mathscinet/search/journaldoc.html?id=3464) [5](https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=118748) [(1992),](https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=118748) [no. 4,](https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=118748) 705–720.
-    
+
 **[HL00]** Hoornaert, K. and Loots, D., [*Computer program written in Maple for the calculation of Igusa's local zeta function*](http://www.wis.kuleuven.ac.be/algebra/kathleen.htm), (2000).
-    
+
 **[Var76]** Varchenko, A. N., *Zeta-function of monodromy and Newton's diagram*.  [*Invent. Math.*](https://mathscinet.ams.org/mathscinet/search/journaldoc.html?id=449) [37](https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=392830) [(1976),](https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=392830) [no. 3,](https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=392830) 253–262.
-    
+
     **[Viu12]** Viu-Sos, J., [*Funciones zeta y poliedros de Newton: Aspectos teoricos y computacionales*](https://zaguan.unizar.es/record/8916/files/TAZ-TFM-2012-749.pdf), Master Thesis, (2012). 
