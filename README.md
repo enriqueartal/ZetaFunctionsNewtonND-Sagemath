@@ -16,7 +16,7 @@ To be used in `Sagemath>=v9.0`.
 
 ## A minimal example
 
-First, download `.py` and locate it in your working folder.
+First, you should download `ZetaFunctionsNewtonND.py` and locate it in your working folder.
 
 A minimal example could be:
 
