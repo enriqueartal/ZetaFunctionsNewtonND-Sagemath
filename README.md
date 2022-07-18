@@ -72,6 +72,16 @@ You can find much more examples and explanations in the Jupyter notebook [`Examp
 
 
 
+## Authors
+
+- Kathleen Hoornaert (2000): initial version for Maple
+
+- Juan Viu-Sos (2012): initial version for Sage
+
+- Frédéric Chapoton (2017): improved outputs, handling errors and symbolic variables 
+
+- Juan Viu-Sos (2022): improved methods and new functions in the class to visualize 
+
 ## Contact
 
 For any question or comment, please email me: [juan.viu.sos@upm.es](mailto:juan.viu.sos@upm.es)
