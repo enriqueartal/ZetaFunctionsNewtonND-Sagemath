@@ -6,13 +6,33 @@ The file `ZetaFunctionsNewtonND.py` provides a class (the `ZetaFunctions` class)
 
 This class is initialized with a multivariate polynomial and creates an object with several functions for computing the previous zeta functions whenever the associated polynomial is Newton-non-degenerated. Also, several methods to study the associated Newton polyhedron, its faces, dual cones, and possible candidate poles are provided.
 
-This implementation is based in the formulas given in **[DH01]**, **[DL92]** and **[Var76]** and an initial `Maple` program given by K. Hoornaert and D. Loots in **[HL00]**. I would like to thank [Frédéric Chapoton](https://irma-web1.math.unistra.fr/~chapoton/) (Univ. Strasbourg), who improved outputs, handling errors and symbolic variables in a middle-stage version of this computer program.
+This implementation is based in the formulas given in **[DH01]**, **[DL92]** and **[Var76]** and an initial `Maple` program by K. Hoornaert and D. Loots in **[HL00]**. I would like to thank [Frédéric Chapoton](https://irma-web1.math.unistra.fr/~chapoton/) (Univ. Strasbourg), who improved outputs, handling errors and symbolic variables in a middle-stage version of this computer program.
+
+
 
 ## Prerequisites
 
 To be used in `Sagemath>=v9.0`.
 
-## Methods in `ZetaFunctions`:
+## A minimal example
+
+First, download `.py` and locate it in your working folder.
+
+A minimal example could be:
+
+```python
+sage: load('ZetaFunctionsNewtonND.py')
+sage: R.<x,y,z,t> = QQ[]
+sage: zex = ZetaFunctions(x^4 + y^3*z^3+y^3*t^3+z^3*t^3)
+sage: zex1.topological_zeta(local = True)
+(1/4) * (s + 3/4)^-1 * (s + 11/12)^-1 * (s + 1)^-1 * (s^2 + 23/12*s + 11/4)
+sage: zex1.monodromy_zeta()
+(t - 1)^-8 * (t + 1)^-8 * (t^2 + 1)^-17 * (t^2 - t + 1)^-9 * (t^2 + t + 1)^-9 * (t^4 - t^2 + 1)^-18
+```
+
+You can find much more examples and explanations in the Jupyter notebook [`Examples_ZetaFunctions.ipynb`](https://github.com/jviusos/ZetaFunctionsNewtonND-Sagemath/blob/main/Examples_ZetaFunctions.ipynb).
+
+## Methods in `ZetaFunctions`
 
 - `cones_plot(self, **kwargs)`
 
@@ -38,22 +58,6 @@ To be used in `Sagemath>=v9.0`.
 
 - `monodromy_zeta(self, char=False, info=False, check='ideals')`
 
-## A minimal example
-
-A minimal example could be:
-
-```python
-sage: load('ZetaFunctionsNewtonND.py')
-sage: R.<x,y,z,t> = QQ[]
-sage: zex = ZetaFunctions(x^4 + y^3*z^3+y^3*t^3+z^3*t^3)
-sage: zex1.topological_zeta(local = True)
-(1/4) * (s + 3/4)^-1 * (s + 11/12)^-1 * (s + 1)^-1 * (s^2 + 23/12*s + 11/4)
-sage: zex1.monodromy_zeta()
-(t - 1)^-8 * (t + 1)^-8 * (t^2 + 1)^-17 * (t^2 - t + 1)^-9 * (t^2 + t + 1)^-9 * (t^4 - t^2 + 1)^-18
-```
-
-You can find much more examples and explanations in the Jupyter notebook [`Examples_ZetaFunctions.ipynb`](https://github.com/jviusos/ZetaFunctionsNewtonND-Sagemath/blob/main/Examples_ZetaFunctions.ipynb).
-
 ## References
 
 **[DH01]** Denef, J. and Hoornaert, K., *Newton Polyhedra and Igusa's Local Zeta Function*, 2001. [*J. Number Theory*](https://mathscinet.ams.org/mathscinet/search/journaldoc.html?id=3003) [89](https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=193003) [(2001),](https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=193003) [no. 1,](https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=193003) 31–64.
@@ -65,3 +69,9 @@ You can find much more examples and explanations in the Jupyter notebook [`Examp
 **[Var76]** Varchenko, A. N., *Zeta-function of monodromy and Newton's diagram*.  [*Invent. Math.*](https://mathscinet.ams.org/mathscinet/search/journaldoc.html?id=449) [37](https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=392830) [(1976),](https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=392830) [no. 3,](https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=392830) 253–262.
 
 **[Viu12]** Viu-Sos, J., [*Funciones zeta y poliedros de Newton: Aspectos teoricos y computacionales*](https://zaguan.unizar.es/record/8916/files/TAZ-TFM-2012-749.pdf), Master Thesis, (2012). 
+
+
+
+## Contact
+
+For any question or comment, please email me: [juan.viu.sos@upm.es](mailto:juan.viu.sos@upm.es)
