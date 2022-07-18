@@ -1,6 +1,6 @@
 # ZetaFunctionsNewtonND-Sagemath
 
- A Sagemath class for computing (local) Igusa and topological zeta functions for Newton-non-degenerated polynomials
+_A `Sagemath` class for computing (local) Igusa and topological zeta functions for Newton-non-degenerated polynomials_
 
 The file `ZetaFunctionsNewtonND.py` provides a class (the `ZetaFunctions` class) in Sagemath together with methods in order to study and compute local and global Igusa and topological zeta functions for Newton-non-degenerated polynomials.
 
