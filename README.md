@@ -12,7 +12,7 @@ This implementation is based in the formulas given in **[DH01]**, **[DL92]** and
 
 ## Prerequisites
 
-To be used in `Sagemath>=v9.0`.
+- `Sagemath>=v9.0`.
 
 ## A minimal example
 
