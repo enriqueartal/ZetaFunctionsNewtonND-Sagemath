@@ -22,9 +22,9 @@ A minimal example could be:
 sage: load('ZetaFunctionsNewtonND.py')
 sage: R.<x,y,z,t> = QQ[]
 sage: zex = ZetaFunctions(x^4 + y^3*z^3+y^3*t^3+z^3*t^3)
-sage: zex1.topological_zeta(local = True)
+sage: zex.topological_zeta(local = True)
 (1/4) * (s + 3/4)^-1 * (s + 11/12)^-1 * (s + 1)^-1 * (s^2 + 23/12*s + 11/4)
-sage: zex1.monodromy_zeta()
+sage: zex.monodromy_zeta()
 (t - 1)^-8 * (t + 1)^-8 * (t^2 + 1)^-17 * (t^2 - t + 1)^-9 * (t^2 + t + 1)^-9 * (t^4 - t^2 + 1)^-18
 ```
 
