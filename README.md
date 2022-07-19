@@ -76,7 +76,7 @@ You can find much more examples and explanations in the Jupyter notebook [`Examp
 
 - Frédéric Chapoton (2017): improved outputs, handling errors and symbolic variables 
 
-- Juan Viu-Sos (2022): improved methods and new functions in the class to visualize 
+- Juan Viu-Sos (2022): improved methods and new functions in the class to visualize Newton polihedra
 
 ## Contact
 
