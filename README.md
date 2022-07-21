@@ -32,29 +32,35 @@ You can find much more examples and explanations in the Jupyter notebook [`Examp
 
 ## Methods in `ZetaFunctions`
 
-- `cones_plot(self, **kwargs)`
-
-- `dict_info_poles(self, d=1, weights=None, local=False)`
-
-- `get_newton_polyhedron(self)`
-
-- `get_polyfaces_dictionary(self, keys = 'polynomials', compact = False)`
-
-- `give_expected_pole_info(self, d=1, local=False, weights=None)`
-
-- `give_info_facets(self, compact = False)`
-
-- `give_info_newton(self, faces=False, cones=False, compact = False)`
-
-- `is_newton_degenerated(self, p=None, local=False, method='default', info = False)`
-
-- `newton_plot(self, point_size = 30, **kwargs)`
+### Computing zeta functions
 
 - `igusa_zeta(self, p=None, dict_Ntau={}, local=False, weights=None, info=False, check='ideals')`
 
 - `topological_zeta(self, d=1, local=False, weights=None, info=False, check='ideals')`
 
 - `monodromy_zeta(self, char=False, info=False, check='ideals')`
+
+### Newton polyhedron & cones: information and plotting
+
+- `cones_plot(self, **kwargs)`
+
+- `is_newton_degenerated(self, p=None, local=False, method='default', info = False)`
+
+- `get_newton_polyhedron(self)`
+
+- `give_info_facets(self, compact = False)`
+
+- `give_info_newton(self, faces=False, cones=False, compact = False)`
+
+- `newton_plot(self, point_size = 30, **kwargs)`
+
+### Information about (candidate) poles
+
+- `dict_info_poles(self, d=1, weights=None, local=False)`
+
+- `get_polyfaces_dictionary(self, keys = 'polynomials', compact = False)`
+
+- `give_expected_pole_info(self, d=1, local=False, weights=None)`
 
 ## References
 
