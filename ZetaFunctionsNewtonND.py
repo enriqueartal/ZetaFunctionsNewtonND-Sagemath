@@ -49,7 +49,7 @@ COMPUTING (LOCAL) IGUSA AND TOPOLOGICAL ZETA FUNCTIONS FOR NEWTON NON-DEGENERATE
 from sage.all import (ZZ, QQ, Integer, matrix, vector, polygen, Polyhedron, gcd,
                       factor, simplify, expand, flatten,
                       Cone, Fan, GF, Tuples, prod,
-                      VectorSpace, PointConfiguration, mrange, rank,
+                      VectorSpace, PointConfiguration, mrange,
                       point, point3d, var)
 
 
@@ -228,7 +228,7 @@ class ZetaFunctions():
                 gens_cone = [tuple(v) for v in primitive_vectors(tau)]
                 if set(gens_cone) == dict_poles[max_pole][0]:
                     dict_poles[max_pole][1] = [tau]
-                    dict_poles[max_pole][2] = rank(matrix(gens_cone))
+                    dict_poles[max_pole][2] = matrix(gens_cone).rank()
                     dict_poles[max_pole][3] = False
                     break
             poles_set.remove(max_pole)
@@ -647,7 +647,6 @@ class ZetaFunctions():
         f = self._f
         s = polygen(QQ, 's')
         ring_s = s.parent()
-        # s = var('s')
         P = self._Gammaf
         if check != 'no_check':
             if local:
@@ -1155,7 +1154,7 @@ def ftau(f, tau):
 
     EXAMPLES::
 
-        sage: R.<x,y,z> = QQ[]; p = var('p')
+        sage: R.<x,y,z> = QQ[]
         sage: f1 = x^2 - y^2 + z^3
         sage: P = newton_polyhedron(f1)
         sage: fa = P.faces(2)[1]
@@ -1613,8 +1612,8 @@ def face_divisors(d, faces_set, P):
         # integral points views above.
         for scone in F:
             L_vectors += integral_vectors(scone) + primitive_vectors_cone(scone)
-        l = gcd(m_vect(i, P) for i in L_vectors)
-        if d.divides(l):
+        ell = gcd(m_vect(i, P) for i in L_vectors)
+        if not ell % d:
             L_faces.append(tau)
     return L_faces
 
