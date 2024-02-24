@@ -86,6 +86,7 @@ class ZetaFunctions():
     Methods in ZetaFunctions:
 
     - ``cones_plot(self, **kwargs)``
+    - ``actual_faces(self, d=1, local=False)``
     - ``dict_info_poles(self, d=1, weights=None, local=False)``
     - ``get_newton_polyhedron(self)``
     - ``get_polyfaces_dictionary(self, keys = 'polynomials', compact=False)``
@@ -122,7 +123,7 @@ class ZetaFunctions():
             Facet 2: z >= 0
             Facet 3: y >= 0
             Facet 4: x >= 0
-        sage: zex.topological_zeta()
+        sage: zex.topological_zeta().factor()
         (1/2) * (s + 1)^-1 * (s + 3/2)^-1 * (s + 3)
         sage: zex.give_expected_pole_info()
         The candidate poles of the (local) topological zeta function
@@ -608,7 +609,7 @@ class ZetaFunctions():
 
         INPUT:
 
-        - ``p`` -- a primer number or ``None`` (default: ''None``),
+        - ``p`` -- a primer number or ``None`` (default: ``None``),
           ``None`` stands for the abstract case
 
         - ``local`` -- boolean (default: ``False``), if ``True`` it calculates
@@ -652,7 +653,7 @@ class ZetaFunctions():
         EXAMPLES::
 
             sage: R.<x,y,z> = QQ[]
-            sage: P.<p> = QQ[]
+            sage: _ = var('p, s')
             sage: zex1 = ZetaFunctions(x^2 - y^2 + z^3)
 
         For p=3 given::
@@ -663,8 +664,11 @@ class ZetaFunctions():
         For p arbitrary, we can give the number of solutions over the faces::
 
             sage: dNtau1 = {x^2-y^2+z^3: (p-1)*(p-3), -y^2+z^3: (p-1)^2, x^2+z^3: (p-1)^2, x^2-y^2: 2*(p-1)^2}
-            sage: zex1.igusa_zeta(p = None, dict_Ntau = dNtau1).factor()
-            (p - 1)*p^(2*s)*(p^(2*s + 4) + p - p^(s + 1) - 1)/((p^(3*s + 4) - 1)*(p^(s + 1) - 1))
+            sage: z1 = zex1.igusa_zeta(p = None, dict_Ntau = dNtau1)
+            sage: numer = (p - 1)*p^(2*s)*(p^(2*s + 4) + p - p^(s + 1) - 1)
+            sage: denom = (p^(3*s + 4) - 1)*(p^(s + 1) - 1)
+            sage: bool(z1 == numer / denom)
+            True
 
             sage: zex2 = ZetaFunctions(x^2 + y*z + z^2)
 
@@ -739,27 +743,32 @@ class ZetaFunctions():
                          check='ideals'):
         r"""
         Return the expression of the Topological zeta function
-        `Z_{top, f}^{(d)}` for `d\geq 1`, in terms of the symbolic
-        variable ``s``:
+        `Z_{top, f}^{(d)}` for `d\geq 1`, as a rational function
+        in the variable ``s``:
 
-        - ``local = True`` calculates the local Topological
-          zeta function (at the origin).
+        INPUT:
 
-        - ``weights`` -- a `n`-tuple of non-negative integers
-          `(w_1,\ldots,w_n)` representing the volume form
-          `x_1^{w_1-1}\cdots x_n^{w_n-1}\ dx_1\wedge\cdots\wedge dx_n`.
+        - ``d`` -- a positive integer (default: ``1``), only the divisors whose
+          multiplicity is a multiple of ``d`` are considered (see [DL92]_).
 
-        - ``d`` -- (default:1) an integer. We consider only the divisor
-          whose multiplicity is a multiple of ``d`` (see [DL92]_).
+        - ``local`` -- boolean (default: ``False``), if ``True`` it calculates
+          the local topological zeta function (at the origin)
 
-        - ``info = True`` gives information of each face `\tau`, the
-            associated cone of `\tau`, and the values `J_\tau` and
-            `\mathop{dim}(\tau)!\cdot\mathop{Vol}(\tau)`
-            in the process (see [DL92]_).
+        - ``weights`` -- list (default: ``None``),
+          an `n`-list of positive integers
+          `[w_1,\ldots,w_n]` representing the volume form
+          `x_1^{w_1-1}\cdots x_n^{w_n-1}\ dx_1\wedge\cdots\wedge dx_n`;
+          if set to ``None``, ``w_i = 1``
 
-        - ``check`` -- choose the method to check the non-degeneracy condition
-          ('default' or 'ideals'). If ``check = 'no_check'``, degeneracy
-          checking is omitted.
+        - ``info`` -- boolean (default: ``False``), if ``True`` it gives
+          information of each face `\tau`, the associated cone of `\tau`,
+          and the values `J_\tau` and
+          `\mathop{dim}(\tau)!\cdot\mathop{Vol}(\tau)`
+          in the process (see [DL92]_)
+
+        - ``check`` -- string (default: ``'default'``), choose the method to
+          check the non-degeneracy condition ('default' or 'ideals').
+          If ``check = 'no_check'``, degeneracy checking is omitted
 
         .. WARNING::
 
@@ -771,12 +780,12 @@ class ZetaFunctions():
 
             sage: R.<x,y,z> = QQ[]
             sage: zex1 = ZetaFunctions(x^2 + y*z)
-            sage: zex1.topological_zeta()
+            sage: zex1.topological_zeta().factor()
             (1/2) * (s + 1)^-1 * (s + 3/2)^-1 * (s + 3)
 
         For d = 2::
 
-            sage: zex1.topological_zeta(d = 2)
+            sage: zex1.topological_zeta(d = 2).factor()
             (1/2) * (s + 3/2)^-1
 
         REFERENCES:
@@ -799,25 +808,22 @@ class ZetaFunctions():
                     raise TypeError('degenerated wrt Newton')
         else:
             print("Warning: not checking the non-degeneracy condition!")
-        result = ring_s.zero()
-        if local:
-            faces_set = compact_faces(P)
+        faces_set = self.actual_faces(d=d, local=local)
+        if local or d > 1:
+            result = ring_s.zero()
         else:
-            faces_set = proper_faces(P)
-            if d == 1:
-                total_face = faces(P)[-1]
-                dim_gamma = total_face.dim()
-                vol_gamma = face_volume(f, total_face)
-                result = (s / (s + 1)) * (-1) ** dim_gamma * vol_gamma
-                if info:
-                    print("Gamma: total polyhedron")
-                    print("J_gamma = 1")
-                    print("dim_Gamma!*Vol(Gamma) = " + str(vol_gamma))
-                    print()
+            total_face = faces(P)[-1]
+            dim_gamma = total_face.dim()
+            vol_gamma = face_volume(f, total_face)
+            result = (s / (s + 1)) * (-1) ** dim_gamma * vol_gamma
+            if info:
+                print("Gamma: total polyhedron")
+                print("J_gamma = 1")
+                print("dim_Gamma!*Vol(Gamma) = " + str(vol_gamma))
+                print()
 
-        faces_set = face_divisors(d, faces_set)
         for tau in faces_set:
-            J_tau, cone_info = Jtau(tau, P, weights, s)
+            J_tau, cone_info = Jtau(tau, tau, weights, s)
             dim_tau = tau.dim()
             vol_tau = face_volume(f, tau)
             if info:
@@ -836,29 +842,31 @@ class ZetaFunctions():
             else:
                 term = ((-1) ** dim_tau) * vol_tau * J_tau
             result += term
-            if result != 0:
-                result = result.factor()
         return result
 
-    def monodromy_zeta(self, char=False, info=False, check='ideals'):
+    def monodromy_zeta(self, char=False, info=False, cyclo_info=False,
+                       check='ideals'):
         r"""
         Return the expression of the Monodromy zeta function at the
         origin, in terms of the symbolic variable ``s``.
 
         INPUT:
 
-        - ``char = True`` prints the characteristic polynomial of
-          the monodromy (only if `f` has an isolated singularity
-          at the origin).
+        - ``char`` -- boolean (default: ``False``), if ``True`` prints the
+          characteristic polynomial of the monodromy (only if `f` has an
+          isolated singularity at the origin)
 
-        - ``info = True`` gives information of each face `\tau`, the associated
-          cone of `\tau`, and the values `J_\tau` and
-          `\mathop{dim}(\tau)!*\mathop{Vol}(\tau)` \
+        - ``info`` -- boolean (default: ``False``), if ``True`` gives
+          information of each face `\tau`, the associated cone of `\tau`, and
+          the values `J_\tau` and `\mathop{dim}(\tau)!*\mathop{Vol}(\tau)`
           in the process (see [Var76]_).
 
-        - ``check`` -- choose the method to check the
-          non-degeneracy condition ('default' or 'ideals'). If
-          ``check = 'no_check'``, degeneracy checking is omitted.
+        - ``cyclo_info`` -- boolean (default: ``False``), if ``True`` prints
+          the cyclotomic factors with their multiplicity
+
+        - ``check`` -- string (default: ``'default'``), choose the method to
+          check the non-degeneracy condition ('default' or 'ideals').
+          If ``check = 'no_check'``, degeneracy checking is omitted
 
         .. WARNING::
 
@@ -870,11 +878,16 @@ class ZetaFunctions():
 
             sage: R.<x,y> = QQ[]
             sage: zex1 = ZetaFunctions(y^7+x^2*y^5+x^5*y^3)
-            sage: zex1.monodromy_zeta(char = True)
+            sage: zex1.monodromy_zeta(char = True, cyclo_info=True)
             The characteristic polynomial of the monodromy is (t - 1)^3 *
             (t^6 + t^5 + t^4 + t^3 + t^2 + t + 1) * (t^18 + t^17 + t^16 +
             t^15 + t^14 + t^13 + t^12 + t^11 + t^10 + t^9 + t^8 + t^7 +
             t^6 + t^5 + t^4 + t^3 + t^2 + t + 1)
+            ======
+            The decomposition in cyclotomic product is:
+            1-cyclotomic polynomial  with multiplicity -2
+            7-cyclotomic polynomial  with multiplicity -1
+            19-cyclotomic polynomial  with multiplicity -1
             ======
             (t - 1)^-2 * (t^6 + t^5 + t^4 + t^3 + t^2 + t + 1)^-1 *
             (t^18 + t^17 + t^16 + t^15 + t^14 + t^13 + t^12 + t^11 +
@@ -885,8 +898,12 @@ class ZetaFunctions():
 
             sage: S.<x,y,z> = QQ[]
             sage: zex2 = ZetaFunctions(x*y + z^3)
-            sage: zex2.monodromy_zeta(char = True)
+            sage: zex2.monodromy_zeta(char = True, cyclo_info=True)
             The characteristic polynomial of the monodromy is t^2 + t + 1
+            ======
+            The decomposition in cyclotomic product is:
+            1-cyclotomic polynomial  with multiplicity 1
+            3-cyclotomic polynomial  with multiplicity 1
             ======
             (-1) * (t - 1) * (t^2 + t + 1)
 
@@ -930,6 +947,19 @@ class ZetaFunctions():
             print("The characteristic polynomial of the monodromy is " +
                   "{}".format(charpoly))
             print("=" * 6)
+        if cyclo_info:
+            cyclotomic = {}
+            for f, m in result.factor():
+                c = f.is_cyclotomic(certificate=True)
+                cyclotomic[c] = m
+            cyclo = list(cyclotomic.keys())
+            cyclo.sort()
+            cyclo_str = "The decomposition in cyclotomic product is:"
+            for c in cyclo:
+                cyclo_str += "\n" + str(c) + "-cyclotomic polynomial "
+                cyclo_str += " with multiplicity " + str(cyclotomic[c])
+            cyclo_str += "\n======"
+            print(cyclo_str)
         return result.factor()
 
 # ------------------------AUXILIARY FUNCTIONS------------------------
@@ -1601,7 +1631,7 @@ def Jtau(tau, P, weights, s_ring):
                 num = multiplicity(scone)
                 den = 1
                 for a in primitive_vectors_cone(scone):
-                    den *= (m_vect(a, P) * s + sigma_vect(a, weights))
+                    den *= (m_vect(a, tau) * s + sigma_vect(a, weights))
                 result = result + num / den
         result = result.factor()
     cone_info = cone_info_output(c, F) + "\n" + "multiplicities = "
