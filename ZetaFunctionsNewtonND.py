@@ -169,7 +169,7 @@ class ZetaFunctions():
     def cones_plot(self, **kwargs):
         r"""
         Plots the Fan of cones associated to Newton's polyhedron
-        (for n = 2 , 3).
+        (for `n = 2, 3`).
 
         Options:
 
@@ -177,39 +177,70 @@ class ZetaFunctions():
         """
         return fan_all_cones(self._Gammaf).plot(**kwargs)
 
+    def actual_faces(self, d=1, local=False):
+        r"""
+        Return the list of faces taking ``d`` and ``local`` into account.
+
+        INPUT:
+
+        - ``d`` -- positive integer (default: ``1``), integer to decide
+          which character is used to compute the Zeta functions
+
+        - ``local`` -- boolean (default: ``False``), looks only for info about
+          compact faces
+        """
+        P = self._Gammaf
+        if local:
+            faces_set = compact_faces(P)
+        else:
+            faces_set = proper_faces(P)
+        return face_divisors(d, faces_set)
+
+
     def dict_info_poles(self, d=1, weights=None, local=False):
         r"""
         Return a dictionary where the keys are the candidate real poles of
         the chosen zeta function.
 
-        INFORMATION ABOUT POLES OF THE TOPOLOGICAL ZETA FUNCTION
+        INPUT:
 
-        Items are lists containing, by order:
+        - ``d`` -- positive integer (default: ``1``), integer to decide
+          which character is used to compute the Zeta functions
 
-        1. The list of perpendicular vectors to the facets that are
-           responsible for the candidate real pole.
+        - ``weights`` -- list (default: ``None``),
+          an `n`-list of non-negative integers
+          `[w_1,\ldots,w_n]` representing the volume form
+          `x_1^{w_1-1}\cdots x_n^{w_n-1}\ dx_1\wedge\cdots\wedge dx_n`;
+          if set to ``None``, ``w_i = 1``
 
-        2. A list of the faces of maximal dimension that are responsible for
-           the expected order.
+        - ``local`` -- boolean (default: ``False``), looks only for info about
+          compact faces
 
-        3. The expected order.
+        OUTPUT:
 
-        4. Boolean: for the candidate pole -1 the factor L_tau or s/(s+1)
-           can contribute to the order. If this is is the case, we increase
-           the expected order due to the S_Delta_tau by 1 and this record
-           gets the value ``True``. In all other cases we do not increase this
-           expected order and this record gets the value ``False``.
+        Information about poles of the topological zeta function:
+
+        - The list of perpendicular vectors to the facets that are
+          responsible for the candidate real pole
+
+        - A list of the faces of maximal dimension that are responsible for
+          the expected order
+
+        - The expected order
+
+        - A boolean: for the candidate pole `-1`
+          the factor ``L_tau`` or `s/(s+1)` can contribute to the order.
+          If this is is the case, we increase the expected order due to
+          the ``S_Delta_tau`` by `1` and this record gets the value ``True``.
+          In all other cases we do not increase this expected order and this
+          record gets the value ``False``
         """
         f = self._f
         P = self._Gammaf
         PL = P.face_lattice()
         # We need to keep the face lattice in order to
         # compare faces
-        if local:
-            faces_set = compact_faces(P)
-        else:
-            faces_set = proper_faces(P)
-        faces_set = face_divisors(d, faces_set, P)
+        faces_set = self.actual_faces(d=d, local=local)
 
         all_prim_vect = set()
         for tau in faces_set:
@@ -222,7 +253,7 @@ class ZetaFunctions():
                 realpole = -sigma_vect(v, weights) / m_vect(v, P)
                 # We initialize a list of attributes if the pole is
                 # not detected yet
-                if dict_poles.get(realpole) is None:
+                if realpole not in dict_poles:
                     dict_poles[realpole] = [set([v]), [], 0, False]
                 else:
                     dict_poles[realpole][0].add(v)
@@ -286,24 +317,23 @@ class ZetaFunctions():
         Return a dictionary with the polynomials associated to each face
         of the Newton's polyhedron.
 
-        Options:
+        INPUT:
 
-        - ``keys = 'faces'`` keys are faces (by default: 'polynomials').
+        - ``keys`` -- string  (default: 'polynomials'), either
+          'faces' or 'polynomials', to decide the type of keys
 
-        - ``compact = True`` consider only the compact
-          faces (by default: False).
+        - ``compact`` -- boolean (default: ``False``), if
+          set to ``True``, consider only the compact faces.
         """
         if compact:
             faces_set = compact_faces(self._Gammaf)
         else:
             faces_set = proper_faces(self._Gammaf)
         if keys == 'polynomials':
-            d = {ftau(self._f, tau): tau for tau in faces_set}
-        elif keys == 'faces':
-            d = {tau: ftau(self._f, tau) for tau in faces_set}
-        else:
-            raise ValueError("Not recognized option for 'keys'.")
-        return d
+            return {ftau(self._f, tau): tau for tau in faces_set}
+        if keys == 'faces':
+            return {tau: ftau(self._f, tau) for tau in faces_set}
+        raise ValueError("Not recognized option for 'keys'.")
 
     def give_expected_pole_info(self, d=1, local=False, weights=None):
         r"""
@@ -311,12 +341,20 @@ class ZetaFunctions():
         topological zeta function `Z_{top, f}^{(d)}(s)` like order of
         poles and responsible faces of highest dimension.
 
-        - ``local = True`` calculates the local (at the origin) topological
-          Zeta function.
+        INPUT:
 
-        - ``weights`` -- a `n`-tuple of non-negative integers
-          `(w_1,\ldots,w_n)` representing the volume form
-          `x_1^{w_1-1}\cdots x_n^{w_n-1}\ dx_1\wedge\cdots\wedge dx_n`.
+
+        - ``d`` -- positive integer (default: ``1``), integer to decide
+          which character is used to compute the Zeta functions
+
+        - ``local`` -- boolean (default: ``False``), if ``True`` it
+          calculates the local (at the origin) topological Zeta function.
+
+        - ``weights`` -- list (default: ``None``),
+          an `n`-list of non-negative integers
+          `[w_1,\ldots,w_n]` representing the volume form
+          `x_1^{w_1-1}\cdots x_n^{w_n-1}\ dx_1\wedge\cdots\wedge dx_n`;
+          if set to ``None``, ``w_i = 1``
 
         REFERENCES:
 
@@ -325,14 +363,10 @@ class ZetaFunctions():
                   J. Number Theory 89 (2001), no. 1, 31-64.
         """
         f = self._f
-        dict_poles = self.dict_info_poles(d, weights, local)
         P = self._Gammaf
-        if local:
-            faces_set = compact_faces(P)
-        else:
-            faces_set = proper_faces(P)
+        faces_set = self.actual_faces(d=d, local=local)
+        dict_poles = self.dict_info_poles(d=d, weights=weights, local=local)
 
-        faces_set = face_divisors(d, faces_set, P)
         n_supp_by_face = [len(support_points_in_face(f, tau))
                           for tau in faces_set]
         if not dict_poles:
@@ -574,42 +608,25 @@ class ZetaFunctions():
         For p=3 given::
 
             sage: zex1.igusa_zeta(p = 3)
-            2*3^(2*s)*(3^(2*s + 4) - 3^(s + 1) + 2) /
-            ((3^(3*s + 4) - 1)*(3^(s + 1) - 1))
+            2*3^(2*s)*(3^(2*s + 4) - 3^(s + 1) + 2)/((3^(3*s + 4) - 1)*(3^(s + 1) - 1))
 
         For p arbitrary, we can give the number of solutions over the faces::
 
-            sage: a = (p - 1)^2
-            sage: f0 = x^2 - y^2 + z^3
-            sage: f1 = -y^2 + z^3
-            sage: f2 = x^2 + z^3
-            sage: f3 = x^2 - y^2
-            sage: dNtau1 = {f0: (p - 1) * (p - 3), f1: a, f2: a, f3: 2 * a}
+            sage: dNtau1 = {x^2-y^2+z^3: (p-1)*(p-3), -y^2+z^3: (p-1)^2, x^2+z^3: (p-1)^2, x^2-y^2: 2*(p-1)^2}
             sage: zex1.igusa_zeta(p = None, dict_Ntau = dNtau1)
-            (p + p^(2*s + 4) - p^(s + 1) - 1)*(p - 1)*p^(2*s) /
-            ((p^(3*s + 4) - 1)*(p^(s + 1) - 1))
+            (p^(2*s + 4) + p - p^(s + 1) - 1)*(p - 1)*p^(2*s)/((p^(3*s + 4) - 1)*(p^(s + 1) - 1))
 
             sage: zex2 = ZetaFunctions(x^2 + y*z + z^2)
 
         For p=3 mod 4, we can give the number of solutions over the faces::
 
-            sage: a = (p - 1)^2
-            sage: f0 = x^2 + y * z + z^2
-            sage: f1 = y * z + z^2
-            sage: f2 = x^2 + y * z
-            sage: f3 = x^2 + y^2
-            sage: dNtau2 = {f0: a, f1: a, f2: a, f3: 0}
+            sage: dNtau2 = {x^2+y*z+z^2: (p-1)^2,y*z+z^2: (p-1)^2, x^2+y*z: (p-1)^2,x^2+z^2 : 0}
             sage: zex2.igusa_zeta(p = None, dict_Ntau = dNtau2)
             (p - 1)*p^(2*s)*(p^(s + 3) - 1)/((p^(2*s + 3) - 1)*(p^(s + 1) - 1))
 
         For p=1 mod 4::
 
-            sage: a = (p - 1)^2
-            sage: f0 = x^2 + y * z + z^2
-            sage: f1 = y * z + z^2
-            sage: f2 = x^2 + y * z
-            sage: f3 = x^2 + y^2
-            sage: dNtau2bis = {f0: (p-1)*(p-3), f1: a,  f2: a, f3: 2*a}
+            sage: dNtau2bis = {x^2+y*z+z^2: (p-1)*(p-3), y*z+z^2: (p-1)^2, x^2+y*z: (p-1)^2, x^2+z^2: 2*(p-1)^2}
             sage: zex2.igusa_zeta(p = None, dict_Ntau = dNtau2bis)
             (p - 1)*p^(2*s)*(p^(s + 3) - 1)/((p^(2*s + 3) - 1)*(p^(s + 1) - 1))
 
@@ -747,7 +764,7 @@ class ZetaFunctions():
                     print("dim_Gamma!*Vol(Gamma) = " + str(vol_gamma))
                     print()
 
-        faces_set = face_divisors(d, faces_set, P)
+        faces_set = face_divisors(d, faces_set)
         for tau in faces_set:
             J_tau, cone_info = Jtau(tau, P, weights, s)
             dim_tau = tau.dim()
@@ -1119,7 +1136,7 @@ def simplicial_partition(cone):
         sage: f=x^2 + y*z
         sage: P=newton_polyhedron(f)
         sage: faces_set = proper_faces(P)
-        sage: faces_set = face_divisors(1, faces_set, P)
+        sage: faces_set = face_divisors(1, faces_set)
         sage: tau = faces_set[1]
         sage: c = cone_from_face(tau)
         sage: simplicial_partition(c)  # BUG HERE
@@ -1561,7 +1578,7 @@ def Jtau(tau, P, weights, s):
         sage: s = var('s')
         sage: P=newton_polyhedron(f)
         sage: faces_set = proper_faces(P)
-        sage: faces_set = face_divisors(1, faces_set, P)
+        sage: faces_set = face_divisors(1, faces_set)
         sage: Jtau(faces_set[1], P, None, s)[0]
         (2*s + 5)/(2*s + 3)^2
 
@@ -1694,7 +1711,7 @@ def face_volume(f, tau):
     return result
 
 
-def face_divisors(d, faces_set, P):
+def face_divisors(d, faces_set):
     r"""
     Return a list of faces `\tau` in ``faces_set`` such that ``d`` divides
     `m(\Delta_\tau) = \mathop{gcd}\{m(a) \mid a\in\Delta_\tau\cap\ZZ^n\}`
@@ -1705,7 +1722,7 @@ def face_divisors(d, faces_set, P):
         sage: R.<x,y,z> = QQ[]
         sage: f = x^2 - y^2 + z^3
         sage: P = newton_polyhedron(f)
-        sage: face_divisors(3, P.faces(1), P)
+        sage: face_divisors(3, P.faces(1))
         [A 1-dimensional face of a Polyhedron in QQ^3 defined
          as the convex hull of 2 vertices,
          A 1-dimensional face of a Polyhedron in QQ^3 defined
@@ -1729,7 +1746,7 @@ def face_divisors(d, faces_set, P):
         for scone in F:
             L_vectors += integral_vectors(scone)
             L_vectors += primitive_vectors_cone(scone)
-        ell = gcd(m_vect(i, P) for i in L_vectors)
+        ell = gcd(m_vect(i, tau) for i in L_vectors)
         if not ell % d:
             L_faces.append(tau)
     return L_faces
