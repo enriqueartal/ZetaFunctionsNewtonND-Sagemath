@@ -48,12 +48,27 @@ FOR NEWTON NON-DEGENERATED POLYNOMIALS
 # [ ] Improve topological and monodromy zeta functions outputs
 # [ ] Implementation of the motivic zeta function
 
-from sage.all import (ZZ, QQ, Integer, matrix, vector, polygen, Polyhedron,
-                      gcd, factor, simplify, expand, flatten,
-                      Cone, Fan, GF, Tuples, prod,
-                      VectorSpace, PointConfiguration, mrange,
-                      point, point3d, var)
-
+from sage.arith.misc import gcd
+from sage.calculus.var import var
+from sage.combinat.tuple import Tuples
+from sage.geometry.cone import Cone
+from sage.geometry.fan import Fan
+from sage.geometry.polyhedron.constructor import Polyhedron
+from sage.geometry.triangulation.point_configuration import PointConfiguration
+from sage.matrix.constructor import matrix
+from sage.misc.flatten import flatten
+from sage.misc.misc_c import prod
+from sage.misc.mrange import mrange
+from sage.modules.free_module import VectorSpace
+from sage.modules.free_module_element import vector
+from sage.plot.plot3d.shapes2 import point3d
+from sage.plot.point import point
+from sage.rings.finite_rings.finite_field_constructor import GF
+from sage.rings.integer import Integer
+from sage.rings.integer_ring import ZZ
+from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
+from sage.rings.rational_field import QQ
+from sage.symbolic.ring import SR
 
 class ZetaFunctions():
     r"""
@@ -77,7 +92,7 @@ class ZetaFunctions():
     - ``give_expected_pole_info(self, d=1, local=False, weights=None)``
     - ``give_info_facets(self, compact = False)``
     - ``give_info_newton(self, faces=False, cones=False, compact = False)``
-    - ``is_newton_degenerated(self, p=None, local=False,
+    - ``is_newton_non_degenerated(self, p=None, local=False,
                               method='default', info = False)``
     - ``newton_plot(self, point_size = 30, **kwargs)``
     - ``igusa_zeta(self, p=None, dict_Ntau={}, local=False,
@@ -208,7 +223,7 @@ class ZetaFunctions():
           which character is used to compute the Zeta functions
 
         - ``weights`` -- list (default: ``None``),
-          an `n`-list of non-negative integers
+          an `n`-list of positive integers
           `[w_1,\ldots,w_n]` representing the volume form
           `x_1^{w_1-1}\cdots x_n^{w_n-1}\ dx_1\wedge\cdots\wedge dx_n`;
           if set to ``None``, ``w_i = 1``
@@ -351,7 +366,7 @@ class ZetaFunctions():
           calculates the local (at the origin) topological Zeta function.
 
         - ``weights`` -- list (default: ``None``),
-          an `n`-list of non-negative integers
+          an `n`-list of positive integers
           `[w_1,\ldots,w_n]` representing the volume form
           `x_1^{w_1-1}\cdots x_n^{w_n-1}\ dx_1\wedge\cdots\wedge dx_n`;
           if set to ``None``, ``w_i = 1``
@@ -462,15 +477,17 @@ class ZetaFunctions():
         - Number of proper faces.
         - Inequalities defining facets.
 
-        Options:
+        INPUT:
 
-        - ``faces = True`` prints information about each face in polyhedron.
+        - ``faces`` -- boolean (default: ``False``), if ``True``
+          prints information about each face in polyhedron
 
-        - ``cones = True`` prints information about each cone associated
-          to faces in polyhedron.
+        - ``cones`` -- boolean (default: ``False``), if ``True``
+          prints information about each cone associated
+          to faces in polyhedron
 
-        - ``compact = True`` consider only the compact
-          faces (by default: False).
+        - ``compact`` -- boolean (default: ``False``), if ``True``
+          consider only the compact faces
         """
         if compact:
             faces_set = compact_faces(self._Gammaf)
@@ -496,40 +513,65 @@ class ZetaFunctions():
                     cone_info = cone_info_output(cone_from_face(tau)) + "\n"
                 print("tau" + str(i) + ": " + face_info + cone_info)
 
-    def is_newton_degenerated(self, p=None, local=False,
-                              method='default', info=False):
-        r"""
-        Checks if the polynomial ``f`` is degenerated over
+    def is_newton_non_degenerated(self, p=None, local=False, info=False,
+                                  method='default'):
+        r"""Checks if the polynomial ``f`` is degenerated over
         `\mathbb{F}_p` (``p`` prime) with respect \
         the faces of the polyhedron ``P`` (see [DH01]_).
 
         INPUT:
 
-        - ``p = None``, checks degeneration over `\CC` (which is equivalent
-          to be degenerated over `\mathbb{F}_p` with `p>>0`).
+        - ``p`` -- a primer number or ``None`` (default: ''None``),
+          if ``None`` it checks degeneration over `\CC` (which is
+          equivalent to be degenerated over `\mathbb{F}_p` with `p\gg 0`)
 
-        - ``local = True`` checks degeneration for local case (only with
-          respect the compact faces).
+        - ``local`` -- boolean (default: ``False``), if ``True`` it checks
+          degeneration for local case (only with respect the compact faces)
 
-        - ``info = True`` prints the first face for which the polynomial
-          is degenerated.
+        - ``info`` -- boolean (default: ``False``), if ``True`` it prints the
+          first face for which the polynomial is degenerated
 
         For finite fields (``p`` is a given prime):
 
-        - ``method = 'default'`` checks the condition using evaluation
-          over `(\mathbb{F}_p-0)^n` in the system of equations.
+        - ``method`` -- string (default: 'default')
+            - if 'default', it checks the condition using evaluation
+              over `(\mathbb{F}_p-0)^n` in the system of equations
 
-        - ``method = 'ideals'`` checks the condition using ideals over
-          the finite field.
+            - if 'ideals' it checks the condition using ideals over the
+              finite field.
 
         REFERENCES:
 
         .. [DH01] Denef, J. and Hoornaert, K., Newton Polyhedra and Igusa's
-                  Local Zeta Function, 2001.
-                  J. Number Theory 89 (2001), no. 1, 31-64.
+                Local Zeta Function, 2001.
+                J. Number Theory 89 (2001), no. 1, 31-64.
         """
-        return is_newton_degenerated(self._f, self._Gammaf, p, local,
-                                     method, info)
+        f = self._f
+        P = self._Gammaf
+        if local:
+            faces_set = compact_faces(P)
+        else:
+            faces_set = faces(P)[1:]
+
+        for tau in faces_set:
+            f_tau = ftau(f, tau)
+            if is_degenerated(f_tau, p, method):
+                if info:
+                    # print("The formula for the Igusa zeta function is " +
+                    # "not valid:")
+                    if not p:
+                        print("The polynomial is degenerated at least with " +
+                              "respect to the face tau = {" +
+                              face_info_output(tau) +
+                              "} over the complex numbers!")
+                    else:
+                        print("The polynomial is degenerated at least with " +
+                              "respect to the face tau = {"
+                              + face_info_output(tau)
+                              + "} over GF("
+                              + str(p) + ")!")
+                return False
+        return True
 
     def newton_plot(self, point_size=30, **kwargs):
         r"""
@@ -537,9 +579,9 @@ class ZetaFunctions():
         (for `n = 2, 3`) together with the support of `f`.
         In 3D, the origin is plotted as a black point.
 
-        Options:
+        INPUT:
 
-        - ``point_size`` size of the ponits in plot (by default: 30).
+        - ``point_size`` -- size of the ponits in plot (default: 30).
 
         - Other keyword options for `plot()`.
         """
@@ -557,27 +599,49 @@ class ZetaFunctions():
             raise TypeError('Dimension different from 2 and 3.')
         return (self._Gammaf.plot(**kwargs) + plot_pts)
 
-    def igusa_zeta(self, p=None, dict_Ntau={}, local=False, weights=None,
-                   info=False, check='ideals'):
+    def igusa_zeta(self, p=None, local=False, weights=None,
+                   info=False, check='ideals', dict_Ntau={}):
         r"""
         Return the expression of the Igusa zeta function for `p` a
         prime number (explicit or abstract), in terms of a symbolic
         variable `s`.
 
-        - ``local = True`` calculates the local Igusa zeta function
-          (at the origin).
+        INPUT:
 
-        - ``weights`` -- a `n`-tuple of non-negative integers
-          `(w_1,\ldots,w_n)` representing the volume form
-          `x_1^{w_1-1}\cdots x_n^{w_n-1}\ dx_1\wedge\cdots\wedge dx_n`.
+        - ``p`` -- a primer number or ``None`` (default: ''None``),
+          ``None`` stands for the abstract case
 
-        - ``info = True`` gives information of each face `\tau`, the
-          associated cone of `\tau`, and the values ``L_tau`` and
-          ``S_tau`` in the process.
+        - ``local`` -- boolean (default: ``False``), if ``True`` it calculates
+          the local Igusa zeta function (at the origin)
 
-        - ``check`` -- choose the method to check the non-degeneracy
-          condition ('default' or 'ideals'). If ``check =
-          'no_check'``, degeneracy checking is omitted.
+        - ``weights`` -- list (default: ``None``),
+          an `n`-list of positive integers
+          `[w_1,\ldots,w_n]` representing the volume form
+          `x_1^{w_1-1}\cdots x_n^{w_n-1}\ dx_1\wedge\cdots\wedge dx_n`;
+          if set to ``None``, ``w_i = 1``
+
+        - ``info`` -- boolean (default: ``False``), if ``True`` it gives
+          information of each face `\tau`, the associated cone of `\tau`,
+          and the values ``L_tau`` and ``S_tau`` in the process
+
+        - ``check`` -- string (default: ``'default'``), choose the method to
+          check the non-degeneracy condition ('default' or 'ideals').
+          If ``check = 'no_check'``, degeneracy checking is omitted
+
+        - ``dict_Ntau`` -- dictionary (default: ``{}``), meainingful only in
+          the abstract case ``p = None``:
+
+            - The keys are the polynomials `f_{\tau}` associated of each
+              face `\tau` of the Newton Polyhedron.
+
+            - The values are the associated abstract values
+              `N_{\tau}=\#\{a\in(\mathbb{F}_p-0)^d\mid f^*_{\tau}(a)=0\}`
+              with `f^*_{\tau}=\mathbb{F}_p(f_{\tau})`,
+              depending of a symbolic variable ``p``.
+
+            If the value associated to a face `\tau_k` is not in the
+            dictionary, the method introduces a new symbolic variable
+            ``N_tauk`` to represent `N_{\tau_k}`.
 
         .. WARNING::
 
@@ -585,24 +649,10 @@ class ZetaFunctions():
             is NOT DEGENERATED for `p` with respect to its
             associated Newton Polyhedron (see [DH01]_).
 
-        In the abstract case ``p = None``, you can give a dictionary
-        ``dict_Ntau`` where:
-
-        - The keys are the polynomials `f_{\tau}` associated of each
-          face `\tau` of the Newton Polyhedron.
-
-        - The items are the associated abstract values \
-          `N_{\tau}= \#\{a\in(\mathbb{F}_p - 0)^d \mid f^*_{\tau}(a)=0\}` with
-          `f^*_{\tau}=\mathbb{F}_p(f_{\tau})`,
-          depending of a symbolic variable ``p``.
-
-        If the value associated to a face `\tau_k` is not in the
-        dictionary, function introduces a new symbolic variable
-        ``N_tauk`` to represent `N_{\tau_k}`.
-
         EXAMPLES::
 
-            sage: R.<x,y,z> = QQ[]; p = var('p')
+            sage: R.<x,y,z> = QQ[]
+            sage: P.<p> = QQ[]
             sage: zex1 = ZetaFunctions(x^2 - y^2 + z^3)
 
         For p=3 given::
@@ -613,8 +663,8 @@ class ZetaFunctions():
         For p arbitrary, we can give the number of solutions over the faces::
 
             sage: dNtau1 = {x^2-y^2+z^3: (p-1)*(p-3), -y^2+z^3: (p-1)^2, x^2+z^3: (p-1)^2, x^2-y^2: 2*(p-1)^2}
-            sage: zex1.igusa_zeta(p = None, dict_Ntau = dNtau1)
-            (p^(2*s + 4) + p - p^(s + 1) - 1)*(p - 1)*p^(2*s)/((p^(3*s + 4) - 1)*(p^(s + 1) - 1))
+            sage: zex1.igusa_zeta(p = None, dict_Ntau = dNtau1).factor()
+            (p - 1)*p^(2*s)*(p^(2*s + 4) + p - p^(s + 1) - 1)/((p^(3*s + 4) - 1)*(p^(s + 1) - 1))
 
             sage: zex2 = ZetaFunctions(x^2 + y*z + z^2)
 
@@ -637,14 +687,15 @@ class ZetaFunctions():
                   J. Number Theory 89 (2001), no. 1, 31-64.
         """
         f = self._f
-        s = var('s')
         if not isinstance(p, (int, Integer)):
             p = var('p')
+        s = var('s')
         P = self._Gammaf
         abs_Ngamma = None
         abs_Ntau = None
         if check != 'no_check':
-            if is_newton_degenerated(f, P, p, local, method=check, info=info):
+            if not self.is_newton_non_degenerated(p, local,
+                                                  method=check, info=info):
                 raise TypeError('degenerated wrt Newton')
         else:
             print("Warning: not checking the non-degeneracy condition!")
@@ -735,13 +786,13 @@ class ZetaFunctions():
                   J. Amer. Math. Soc. 5 (1992), no. 4, 05-720.
         """
         f = self._f
-        s = polygen(QQ, 's')
-        ring_s = s.parent()
+        ring_s = PolynomialRing(QQ, 's')
+        s = ring_s.gen(0)
         P = self._Gammaf
         if check != 'no_check':
             if local:
-                if is_newton_degenerated(f, P, local=True,
-                                         method=check, info=info):
+                if not f.is_newton_non_degenerated(local=True,
+                                                   method=check, info=info):
                     raise TypeError('degenerated wrt Newton')
             else:
                 if is_global_degenerated(f, method=check):
@@ -785,7 +836,6 @@ class ZetaFunctions():
             else:
                 term = ((-1) ** dim_tau) * vol_tau * J_tau
             result += term
-            result = simplify(expand(result))
             if result != 0:
                 result = result.factor()
         return result
@@ -848,14 +898,13 @@ class ZetaFunctions():
         f = self._f
         n = f.parent().ngens()
         P = self._Gammaf
-
-        t = polygen(QQ, 't')
-        ring_t = t.parent()
+        ring_t = PolynomialRing(QQ, 't')
+        t = ring_t.gen(0)
 
         if check != 'no_check':
             # if is_global_degenerated(f, method=check):
-            if is_newton_degenerated(f, P, local=True,
-                                     method=check, info=info):
+            if not self.is_newton_non_degenerated(local=True,
+                                                  method=check, info=info):
                 raise TypeError('degenerated wrt Newton')
         else:
             print("Warning: not checking the non-degeneracy condition!")
@@ -877,11 +926,11 @@ class ZetaFunctions():
             den_deg = ring_t(result.denominator()).degree()
             mu = mn * (num_deg - den_deg - 1)
             aux = result(t=~t)
-            charpoly = factor(t ** mu * (t / (t - 1) * aux) ** mn)
+            charpoly = (t ** mu * (t / (t - 1) * aux) ** mn).factor()
             print("The characteristic polynomial of the monodromy is " +
                   "{}".format(charpoly))
             print("=" * 6)
-        return factor(result)
+        return result.factor()
 
 # ------------------------AUXILIARY FUNCTIONS------------------------
 
@@ -1362,58 +1411,6 @@ def is_degenerated(f_tau, p=None, method='default'):
                     bool_ = True
     return bool_
 
-
-def is_newton_degenerated(f, P, p=None, local=False,
-                          method='default', info=True):
-    r"""
-    Checks if the polynomial ``f`` is degenerated over
-    `\mathbb{F}_p` (``p`` prime) with respect \
-    the faces of the polyhedron ``P`` (see [DH01]_).
-
-    If ``p = None``, checks degeneration over `\CC` (which is equivalent to be
-    degenerated over `\mathbb{F}_p` with `p>>0`).
-
-    ``local = True`` checks degeneration for local case
-    (only with respect the compact faces).
-
-    For finite fields (``p`` is a given prime):
-
-    - ``method = 'default'`` checks the condition using evaluation
-      over `(\mathbb{F}_p-0)^n` in the system of equations.
-
-    - ``method = 'ideals'`` checks the condition using ideals over the
-      finite field.
-
-    REFERENCES:
-
-    .. [DH01] Denef, J. and Hoornaert, K., Newton Polyhedra and Igusa's
-              Local Zeta Function, 2001.
-              J. Number Theory 89 (2001), no. 1, 31-64.
-    """
-    if local:
-        faces_set = compact_faces(P)
-    else:
-        faces_set = faces(P)[1:]
-
-    for tau in faces_set:
-        f_tau = ftau(f, tau)
-        if is_degenerated(f_tau, p, method):
-            if info:
-                # print("The formula for the Igusa zeta function is " +
-                # "not valid:")
-                if p not in ZZ:
-                    print("The polynomial is degenerated at least with " +
-                          "respect to the face tau = {" +
-                          face_info_output(tau) +
-                          "} over the complex numbers!")
-                else:
-                    print("The polynomial is degenerated at least with " +
-                          "respect to the face tau = {" +
-                          face_info_output(tau) + "} over GF(" + str(p) + ")!")
-            return True
-    return False
-
-
 # IGUSA ZETA FUNCTION
 # Values Ntau, Ltau and Stau defined in paper [DH01]
 def Ntau(f, tau, p):
@@ -1518,8 +1515,10 @@ def Lgamma(f, p, abs_Ngamma, s):
               J. Number Theory 89 (2001), no. 1, 31-64.
     """
     n = f.parent().ngens()
+    s = SR(s)
     if p not in ZZ:
         N_gamma = abs_Ngamma
+        p = SR(p)
     else:
         sols, vars_ = solve_in_Fp_x(f, p)
         N_gamma = len(sols) * (p - 1) ** (n - len(vars_))
@@ -1563,7 +1562,7 @@ def Stau(f, P, tau, p, weights, s):
 
 # TOPOLOGICAL ZETA FUNCTION
 # Calculation of the expression Jtau defined in paper [DL92]
-def Jtau(tau, P, weights, s):
+def Jtau(tau, P, weights, s_ring):
     r"""
     Return a list [J_tau, cone_info] with ``cone_info`` containing a
     string of information about the cones, simplicial partition,
@@ -1580,7 +1579,7 @@ def Jtau(tau, P, weights, s):
         sage: faces_set = proper_faces(P)
         sage: faces_set = face_divisors(1, faces_set)
         sage: Jtau(faces_set[1], P, None, s)[0]
-        (2*s + 5)/(2*s + 3)^2
+        (1/2) * (s + 3/2)^-2 * (s + 5/2)
 
     REFERENCES:
 
@@ -1588,6 +1587,8 @@ def Jtau(tau, P, weights, s):
               fonctions zêta locales et modifications analytiques,
               J. Amer. Math. Soc. 5 (1992), no. 4, 05-720.
     """
+    s_ring = PolynomialRing(QQ, 's')
+    s = s_ring.gen(0)
     c = cone_from_face(tau)
     dim_cone = c.dim()
     F = simplicial_partition(c)
@@ -1601,7 +1602,8 @@ def Jtau(tau, P, weights, s):
                 den = 1
                 for a in primitive_vectors_cone(scone):
                     den *= (m_vect(a, P) * s + sigma_vect(a, weights))
-                result = factor(simplify(expand(result + num / den)))
+                result = result + num / den
+        result = result.factor()
     cone_info = cone_info_output(c, F) + "\n" + "multiplicities = "
     cone_info += str(list(map(multiplicity, F))) + ", integral points = "
     cone_info += str(list(map(integral_vectors, F)))
@@ -1641,10 +1643,10 @@ def Mtau(tau):
     """
     P = tau.polyhedron()
 
-    t = polygen(QQ, 't')
-    ring_t = t.parent()
-    s = polygen(QQ, 's')
-    ring_s = s.parent()
+    ring_t = PolynomialRing(QQ, 't')
+    t = ring_t.gen(0)
+    ring_s = PolynomialRing(QQ, 's')
+    s = ring_s.gen(0)
 
     c = cone_from_face(tau)
     dim_cone = c.dim()
