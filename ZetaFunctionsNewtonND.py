@@ -70,6 +70,7 @@ from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
 from sage.rings.rational_field import QQ
 from sage.symbolic.ring import SR
 
+
 class ZetaFunctions():
     r"""
     The class ``Zetafunctions`` takes a multivariate polynomial as
@@ -93,13 +94,10 @@ class ZetaFunctions():
     - ``give_expected_pole_info(self, d=1, local=False, weights=None)``
     - ``give_info_facets(self, compact = False)``
     - ``give_info_newton(self, faces=False, cones=False, compact = False)``
-    - ``is_newton_non_degenerated(self, p=None, local=False,
-                              method='default', info = False)``
+    - ``is_newton_non_degenerated(self, p=None, local=False, method='default', info = False)``
     - ``newton_plot(self, point_size = 30, **kwargs)``
-    - ``igusa_zeta(self, p=None, dict_Ntau={}, local=False,
-                   weights=None, info=False, check='ideals')``
-    - ``topological_zeta(self, d=1, local=False,
-                         weights=None, info=False, check='ideals')``
+    - ``igusa_zeta(self, p=None, dict_Ntau={}, local=False, weights=None, info=False, check='ideals')``
+    - ``topological_zeta(self, d=1, local=False, weights=None, info=False, check='ideals')``
     - ``monodromy_zeta(self, char=False, info=False, check='ideals')``
 
     .. WARNING::
@@ -189,7 +187,7 @@ class ZetaFunctions():
 
         Options:
 
-        - Keyword options for `plot()`.
+        - Keyword options for ``plot()``.
         """
         return fan_all_cones(self._Gammaf).plot(**kwargs)
 
@@ -371,12 +369,6 @@ class ZetaFunctions():
           `[w_1,\ldots,w_n]` representing the volume form
           `x_1^{w_1-1}\cdots x_n^{w_n-1}\ dx_1\wedge\cdots\wedge dx_n`;
           if set to ``None``, ``w_i = 1``
-
-        REFERENCES:
-
-        .. [DH01] Denef, J. and Hoornaert, K., Newton Polyhedra and Igusa's
-                  Local Zeta Function, 2001.
-                  J. Number Theory 89 (2001), no. 1, 31-64.
         """
         f = self._f
         P = self._Gammaf
@@ -517,7 +509,7 @@ class ZetaFunctions():
     def is_newton_non_degenerated(self, p=None, local=False, info=False,
                                   method='default'):
         r"""Checks if the polynomial ``f`` is degenerated over
-        `\mathbb{F}_p` (``p`` prime) with respect \
+        `\mathbb{F}_p` (`p` prime) with respect \
         the faces of the polyhedron ``P`` (see [DH01]_).
 
         INPUT:
@@ -536,16 +528,10 @@ class ZetaFunctions():
 
         - ``method`` -- string (default: 'default')
             - if 'default', it checks the condition using evaluation
-              over `(\mathbb{F}_p-0)^n` in the system of equations
+              over `(\mathbb{F}_p\setminus\{0\})^n` in the system of equations
 
             - if 'ideals' it checks the condition using ideals over the
               finite field.
-
-        REFERENCES:
-
-        .. [DH01] Denef, J. and Hoornaert, K., Newton Polyhedra and Igusa's
-                Local Zeta Function, 2001.
-                J. Number Theory 89 (2001), no. 1, 31-64.
         """
         f = self._f
         P = self._Gammaf
@@ -584,7 +570,7 @@ class ZetaFunctions():
 
         - ``point_size`` -- size of the ponits in plot (default: 30).
 
-        - Other keyword options for `plot()`.
+        - Other keyword options for ``plot()``.
         """
         n = self._f.parent().ngens()
         pts = self._f.exponents()
@@ -636,13 +622,16 @@ class ZetaFunctions():
               face `\tau` of the Newton Polyhedron.
 
             - The values are the associated abstract values
-              `N_{\tau}=\#\{a\in(\mathbb{F}_p-0)^d\mid f^*_{\tau}(a)=0\}`
+
+            .. math::
+                N_{\tau}=\#\{a\in(\mathbb{F}_p-0)^d\mid f^*_{\tau}(a)=0\}
+
               with `f^*_{\tau}=\mathbb{F}_p(f_{\tau})`,
-              depending of a symbolic variable ``p``.
+              depending of a symbolic variable `p`
 
             If the value associated to a face `\tau_k` is not in the
             dictionary, the method introduces a new symbolic variable
-            ``N_tauk`` to represent `N_{\tau_k}`.
+            ``N_tauk`` to represent `N_{\tau_k}`
 
         .. WARNING::
 
@@ -656,12 +645,12 @@ class ZetaFunctions():
             sage: _ = var('p, s')
             sage: zex1 = ZetaFunctions(x^2 - y^2 + z^3)
 
-        For p=3 given::
+        For `p=3` given::
 
             sage: zex1.igusa_zeta(p = 3)
             2*3^(2*s)*(3^(2*s + 4) - 3^(s + 1) + 2)/((3^(3*s + 4) - 1)*(3^(s + 1) - 1))
 
-        For p arbitrary, we can give the number of solutions over the faces::
+        For `p` arbitrary, we can give the number of solutions over the faces::
 
             sage: dNtau1 = {x^2-y^2+z^3: (p-1)*(p-3), -y^2+z^3: (p-1)^2, x^2+z^3: (p-1)^2, x^2-y^2: 2*(p-1)^2}
             sage: z1 = zex1.igusa_zeta(p = None, dict_Ntau = dNtau1)
@@ -672,23 +661,17 @@ class ZetaFunctions():
 
             sage: zex2 = ZetaFunctions(x^2 + y*z + z^2)
 
-        For p=3 mod 4, we can give the number of solutions over the faces::
+        For `p=3 \bmod 4`, we can give the number of solutions over the faces::
 
             sage: dNtau2 = {x^2+y*z+z^2: (p-1)^2,y*z+z^2: (p-1)^2, x^2+y*z: (p-1)^2,x^2+z^2 : 0}
             sage: zex2.igusa_zeta(p = None, dict_Ntau = dNtau2)
             (p - 1)*p^(2*s)*(p^(s + 3) - 1)/((p^(2*s + 3) - 1)*(p^(s + 1) - 1))
 
-        For p=1 mod 4::
+        For `p=1 \bmod 4`::
 
             sage: dNtau2bis = {x^2+y*z+z^2: (p-1)*(p-3), y*z+z^2: (p-1)^2, x^2+y*z: (p-1)^2, x^2+z^2: 2*(p-1)^2}
             sage: zex2.igusa_zeta(p = None, dict_Ntau = dNtau2bis)
             (p - 1)*p^(2*s)*(p^(s + 3) - 1)/((p^(2*s + 3) - 1)*(p^(s + 1) - 1))
-
-        REFERENCES:
-
-        .. [DH01] Denef, J. and Hoornaert, K., Newton Polyhedra and Igusa's
-                  Local Zeta Function, 2001.
-                  J. Number Theory 89 (2001), no. 1, 31-64.
         """
         f = self._f
         if not isinstance(p, (int, Integer)):
@@ -763,7 +746,7 @@ class ZetaFunctions():
         - ``info`` -- boolean (default: ``False``), if ``True`` it gives
           information of each face `\tau`, the associated cone of `\tau`,
           and the values `J_\tau` and
-          `\mathop{dim}(\tau)!\cdot\mathop{Vol}(\tau)`
+          `\dim(\tau)!\cdot\operatorname{Vol}(\tau)`
           in the process (see [DL92]_)
 
         - ``check`` -- string (default: ``'default'``), choose the method to
@@ -783,16 +766,10 @@ class ZetaFunctions():
             sage: zex1.topological_zeta().factor()
             (1/2) * (s + 1)^-1 * (s + 3/2)^-1 * (s + 3)
 
-        For d = 2::
+        For `d = 2`::
 
             sage: zex1.topological_zeta(d = 2).factor()
             (1/2) * (s + 3/2)^-1
-
-        REFERENCES:
-
-        .. [DL92] Denef, J. and Loeser, F., Caractéristiques d'Euler-Poincaré,
-                  fonctions zêta locales et modifications analytiques,
-                  J. Amer. Math. Soc. 5 (1992), no. 4, 05-720.
         """
         f = self._f
         ring_s = PolynomialRing(QQ, 's')
@@ -858,7 +835,7 @@ class ZetaFunctions():
 
         - ``info`` -- boolean (default: ``False``), if ``True`` gives
           information of each face `\tau`, the associated cone of `\tau`, and
-          the values `J_\tau` and `\mathop{dim}(\tau)!*\mathop{Vol}(\tau)`
+          the values `J_\tau` and `\dim(\tau)! \operatorname{Vol}(\tau)`
           in the process (see [Var76]_).
 
         - ``cyclo_info`` -- boolean (default: ``False``), if ``True`` prints
@@ -906,11 +883,6 @@ class ZetaFunctions():
             3-cyclotomic polynomial  with multiplicity 1
             ======
             (-1) * (t - 1) * (t^2 + t + 1)
-
-        REFERENCES:
-
-        .. [Var76] Varchenko, A. N., Zeta-function of monodromy and Newton's
-                   diagram. Invent. Math. 37 (1976), no. 3, 253-262.
         """
         f = self._f
         n = f.parent().ngens()
@@ -969,7 +941,7 @@ class ZetaFunctions():
 def newton_polyhedron(f):
     r"""
     Construct an object ``Polyhedra`` that represents the local Newton's
-    Polyhedron `\Gamma(f)` of the polynomial ``f``.
+    Polyhedron `\Gamma(f)` of the polynomial `f`.
     """
     return Polyhedron(vertices=f.exponents(),
                       rays=VectorSpace(QQ, f.parent().ngens()).basis())
@@ -1081,7 +1053,7 @@ def rays(tau):
 def translate_points(points_list):
     r"""
     Return a list of re-parametrized points by affine translation
-    consider the first point in points_list as the origin.
+    consider the first point in ``points_list`` as the origin.
     """
     origin = points_list[0]
     return [v - origin for v in points_list]
@@ -1089,8 +1061,13 @@ def translate_points(points_list):
 
 def facet_info(f, facet):
     r"""
-    Return a string with the inequality which define the facet, writed in form
-    `a_1 x_1 + a_2 x_2 + ... + a_n x_n + b \geq 0`.
+    Return a string with the inequality which define the facet,
+    written in the form
+
+    .. math::
+
+        a_1 x_1 + a_2 x_2 + ... + a_n x_n + b \geq 0.
+
     """
     rep = facet.ambient_Hrepresentation()[0]
     message = str(vector(rep.A()).dot_product(vector(f.parent().gens())) +
@@ -1273,7 +1250,7 @@ def integral_vectors(scone):
 
     .. MATH::
 
-        \{\sum \lambda_j a_j \mid 0\leq \lambda_j <1\}
+        \left\{\sum \lambda_j a_j \mid 0\leq \lambda_j <1\right\}
 
     where `\{a_j\}` is a basis of the simple cone ``scone``.
     """
@@ -1332,7 +1309,7 @@ def sigma_vect(v, weights=None):
 
 def m_vect(v, P):
     r"""
-    Return `m(v):=\mathop{min}\{v\cdot x \mid x\in P\}` where ``v`` is
+    Return `m(v):=\min\{v\cdot x \mid x\in P\}` where ``v`` is
     a vector and ``P`` is a ``Polyhedra`` in the affine space.
     """
     vrat = vector(QQ, v)
@@ -1371,8 +1348,8 @@ def ftau(f, tau):
 def solve_in_Fp_x(f, p):
     r"""
     For ``f`` be an integral polynomial, returns the list `[ \{a\in
-    (\mathbb{F}_p-0)^d \mid f^*(a)=0\}, \{` vars of `f^*\}]` where
-    `f^*` is consider `f` with coefficients in \ `\mathbb{F}_p`, for a
+    (\mathbb{F}_p\setminus\{0\})^d \mid f^*(a)=0\}, \{` vars of `f^*\}]` where
+    `f^*` is `f` with coefficients in \ `\mathbb{F}_p`, for a
     given prime number ``p``.
     """
     g = f.change_ring(GF(p))    # We can lose variables in GF(p)
@@ -1392,24 +1369,18 @@ def solve_in_Fp_x(f, p):
 def is_degenerated(f_tau, p=None, method='default'):
     r"""
     Checks if the polynomial ``f_tau`` is degenerated over
-    `\mathbb{F}_p`, for ``p`` a given prime number ``p`` (see
-    [DH01]_).
+    `\mathbb{F}_p`, for `p` a given prime number (see [DH01]_).
 
     If ``p = None``, checks degeneration over `\CC` (which is
-    equivalent to be degenerated \ over `\mathbb{F}_p` with `p>>0`).
+    equivalent to be degenerated over `\mathbb{F}_p` with `p\gg 0`).
 
     For finite fields (``p`` is a given prime):
 
     - ``method = 'default'`` checks the condition using evaluation over the \
-      `(\mathbb{F}_p-0)^n` in the system of equations.
+      `(\mathbb{F}_p\setminus\{0\})^n` in the system of equations.
 
     - ``method = 'ideals'`` checks the condition using ideals over
       the finite field.
-
-    REFERENCES:
-
-    .. [DH01] J . Denef and K . Hoornaert, "Newton Polyhedra and
-              Igusa's Local Zeta Function.", 2001.
     """
     bool_ = False
     vars_ = f_tau.parent().gens()
@@ -1441,19 +1412,18 @@ def is_degenerated(f_tau, p=None, method='default'):
                     bool_ = True
     return bool_
 
+
 # IGUSA ZETA FUNCTION
 # Values Ntau, Ltau and Stau defined in paper [DH01]
 def Ntau(f, tau, p):
     r"""
-    Return the number `N_{\tau}`.
+    Return the number
 
-    `N_{\tau} = \#\{a\in(\mathbb{F}_p - 0)^d \mid f^*_{\tau}(a)=0\}`
+    .. math::
+        N_{\tau} = \#\{a\in(\mathbb{F}_p - 0)^d \mid f^*_{\tau}(a)=0\}
 
     with `f^*_{\tau}=\mathbb{F}_p(f_{\tau})`
-
-    for a given face `\tau` and `p` a given prime number.
-
-    (see[DH01]_).
+    for a given face `\tau` and `p` a given prime number (see [DH01]_).
 
     EXAMPLES::
 
@@ -1462,12 +1432,6 @@ def Ntau(f, tau, p):
         sage: P = newton_polyhedron(f)
         sage: [Ntau(f,tau,5) for tau in P.faces(1)]
         [16, 32, 16, 0, 0, 0]
-
-    REFERENCES:
-
-    .. [DH01] Denef, J. and Hoornaert, K., Newton Polyhedra and Igusa's
-              Local Zeta Function, 2001.
-              J. Number Theory 89 (2001), no. 1, 31-64.
     """
     n = f.parent().ngens()
     f_tau = ftau(f, tau)
@@ -1501,12 +1465,6 @@ def Ltau(f, tau, p, abs_Ntau, s):
          (64/125, 0),
          (64/125, 0),
          (64/125, 0)]
-
-    REFERENCES:
-
-    .. [DH01] Denef, J. and Hoornaert, K., Newton Polyhedra and Igusa's
-              Local Zeta Function, 2001.
-              J. Number Theory 89 (2001), no. 1, 31-64.
     """
     if p not in ZZ:
         N_tau = abs_Ntau
@@ -1524,7 +1482,7 @@ def Ltau(f, tau, p, abs_Ntau, s):
 def Lgamma(f, p, abs_Ngamma, s):
     r"""
     Return the value `N_{\tau}` for the total polyhedron `\Gamma` in
-    terms of a symbolic variable ``s``.
+    terms of a symbolic variable `s`.
 
     ``abs_Ngamma`` is the corresponding ``Ngamma`` value for abstract
     prime ``p`` (see [DH01]_).
@@ -1537,12 +1495,6 @@ def Lgamma(f, p, abs_Ngamma, s):
         sage: s = var('s')
         sage: Lgamma(f,7,0,s)
         -24/49*(7^s - 1)/(7*7^s - 1) + 216/343
-
-    REFERENCES:
-
-    .. [DH01] Denef, J. and Hoornaert, K., Newton Polyhedra and Igusa's
-              Local Zeta Function, 2001.
-              J. Number Theory 89 (2001), no. 1, 31-64.
     """
     n = f.parent().ngens()
     s = SR(s)
@@ -1565,12 +1517,6 @@ def Stau(f, P, tau, p, weights, s):
     multiplicity and integral points (see [DH01]_).
 
     Value ``S_tau`` is expressed in terms of a symbolic variable ``s``.
-
-    REFERENCES:
-
-    .. [DH01] Denef, J. and Hoornaert, K., Newton Polyhedra and Igusa's
-              Local Zeta Function, 2001.
-              J. Number Theory 89 (2001), no. 1, 31-64.
     """
     c = cone_from_face(tau)
     F = simplicial_partition(c)
@@ -1594,9 +1540,9 @@ def Stau(f, P, tau, p, weights, s):
 # Calculation of the expression Jtau defined in paper [DL92]
 def Jtau(tau, P, weights, s_ring):
     r"""
-    Return a list [J_tau, cone_info] with ``cone_info`` containing a
+    Return a list ``[J_tau, cone_info]`` with ``cone_info`` containing a
     string of information about the cones, simplicial partition,
-    multiplicity and integral points. (see [DenLoe]_)
+    multiplicity and integral points. (see [DL92]_)
 
     Value J_tau is defined in terms of a symbolic variable ``s``.
 
@@ -1610,12 +1556,6 @@ def Jtau(tau, P, weights, s_ring):
         sage: faces_set = face_divisors(1, faces_set)
         sage: Jtau(faces_set[1], P, None, s)[0]
         (1/2) * (s + 3/2)^-2 * (s + 5/2)
-
-    REFERENCES:
-
-    .. [DL92] Denef, J. and Loeser, F., Caractéristiques d'Euler-Poincaré,
-              fonctions zêta locales et modifications analytiques,
-              J. Amer. Math. Soc. 5 (1992), no. 4, 05-720.
     """
     s_ring = PolynomialRing(QQ, 's')
     s = s_ring.gen(0)
@@ -1649,7 +1589,7 @@ def Mtau(tau):
 
     INPUT:
 
-    - `\tau` -- a face of a Newton polyhedron `P`
+    - ``tau`` -- a face of a Newton polyhedron ``P``
 
     EXAMPLES::
 
@@ -1665,11 +1605,6 @@ def Mtau(tau):
         [1, -t + 1, -t^3 + 1, -t + 1, -t^3 + 1, 1]
         sage: [Mtau(tau) for tau in compact_faces(P)]
         [-t^3 + 1, 1, 1]
-
-    REFERENCES:
-
-    .. [Var76] Varchenko, A. N., Zeta-function of monodromy and Newton's
-               diagram. Invent. Math. 37 (1976), no. 3, 253-262.
     """
     P = tau.polyhedron()
 
@@ -1696,17 +1631,17 @@ def Mtau(tau):
 
 def face_volume(f, tau):
     r"""
-    Return the value `\mathop{Vol}(\tau)\cdot(\mathop{dim}\tau)!`, for
+    Return the value `\operatorname{Vol}(\tau)\cdot(\dim\tau)!`, for
     a given face ``tau`` .
 
-    `\mathop{Vol}(\tau)` is defined as follows:
+    `\operatorname{Vol}(\tau)` is defined as follows:
 
-    Let `\omega_\tau` be the volume form over `\mathop{Aff}(\tau)`,
+    Let `\omega_\tau` be the volume form over `\operatorname{Aff}(\tau)`,
     the affine space generated \ by `\tau` such that the
     parallelepiped spanned by a lattice basis of
-    `\mathop{Aff}(\tau)\cap\ZZ^n`` has volume 1. Then
-    `\mathop{Vol}(\tau)` is the volume of `\tau` intersection the
-    Global Newton \ Polyhedron of ``f`` with respect to `\omega_\tau`
+    `\operatorname{Aff}(\tau)\cap\ZZ^n` has volume 1. Then
+    `\operatorname{Vol}(\tau)` is the volume of `\tau` intersection the
+    Global Newton \ Polyhedron of `f` with respect to `\omega_\tau`
     (see [DL92]_).
 
     EXAMPLES::
@@ -1716,12 +1651,6 @@ def face_volume(f, tau):
         sage: P = newton_polyhedron(f)
         sage: [face_volume(f, tau) for tau in P.faces(1)]
         [1, 2, 1, 0, 0, 0]
-
-    REFERENCES:
-
-    .. [DL92] Denef, J. and Loeser, F., Caractéristiques d'Euler-Poincaré,
-              fonctions zêta locales et modifications analytiques,
-              J. Amer. Math. Soc. 5 (1992), no. 4, 05-720.
     """
     n = f.parent().ngens()
     dim_tau = tau.dim()
@@ -1746,7 +1675,7 @@ def face_volume(f, tau):
 def face_divisors(d, faces_set):
     r"""
     Return a list of faces `\tau` in ``faces_set`` such that ``d`` divides
-    `m(\Delta_\tau) = \mathop{gcd}\{m(a) \mid a\in\Delta_\tau\cap\ZZ^n\}`
+    `m(\Delta_\tau) = \gcd\{m(a) \mid a\in\Delta_\tau\cap\ZZ^n\}`
     where `\Delta_\tau` is the associated cone of `\tau`.
 
     EXAMPLES::
@@ -1787,19 +1716,19 @@ def face_divisors(d, faces_set):
 def is_global_degenerated(f, p=None, method='default'):
     r"""
     Check if the polynomial ``f`` is degenerated over `\mathbb{F}_p`
-    (``p`` prime) with respect to the faces of the Global Newton
+    (`p` prime) with respect to the faces of the Global Newton
     Polyhedron of ``f`` (see [DL92]_).
 
     If ``p = None``, checks degeneration over `\CC` (which is equivalent to be
-    degenerated over `\mathbb{F}_p` with `p>>0`).
+    degenerated over `\mathbb{F}_p` with `p\gg 0`).
 
     ``local = True`` checks degeneration for local case (only with respect the
     compact faces).
 
-    For finite fields (``p`` is a given prime):
+    For finite fields (`p` is a given prime):
 
     - ``method = 'default'`` checks the condition using evaluation over
-      `(\mathbb{F}_p-0)^n` in the system of equations.
+      `(\mathbb{F}_p\setminus\{0\})^n` in the system of equations.
 
     - ``method = 'ideals'`` checks the condition using ideals over the
       finite field.
