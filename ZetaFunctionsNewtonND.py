@@ -623,8 +623,9 @@ class ZetaFunctions():
 
             - The values are the associated abstract values
 
-            .. math::
-                N_{\tau}=\#\{a\in(\mathbb{F}_p-0)^d\mid f^*_{\tau}(a)=0\}
+                .. math::
+                    N_{\tau}=\#\{a\in(\mathbb{F}_p\setminus\{0\})^d\mid
+                    f^*_{\tau}(a)=0\}
 
               with `f^*_{\tau}=\mathbb{F}_p(f_{\tau})`,
               depending of a symbolic variable `p`
@@ -642,7 +643,7 @@ class ZetaFunctions():
         EXAMPLES::
 
             sage: R.<x,y,z> = QQ[]
-            sage: _ = var('p, s')
+            sage: p, s = var('p, s')
             sage: zex1 = ZetaFunctions(x^2 - y^2 + z^3)
 
         For `p=3` given::
@@ -710,7 +711,7 @@ class ZetaFunctions():
                     if abs_Ntau is None:
                         abs_Ntau = var('N_tau' + str(i))
             L_tau, N_tau = Ltau(f, tau, p, abs_Ntau, s)
-            S_tau, cone_info = Stau(f, P, tau, p, weights, s)
+            S_tau, cone_info = Stau(f, tau, p, weights, s)
             if info:
                 print("tau" + str(i) + ":")
                 print(face_info_output(tau))
@@ -800,7 +801,7 @@ class ZetaFunctions():
                 print()
 
         for tau in faces_set:
-            J_tau, cone_info = Jtau(tau, tau, weights, s)
+            J_tau, cone_info = Jtau(tau, weights, ring_s)
             dim_tau = tau.dim()
             vol_tau = face_volume(f, tau)
             if info:
@@ -934,6 +935,47 @@ class ZetaFunctions():
             print(cyclo_str)
         return result.factor()
 
+    def Mtaus(self):
+        r"""
+        Return a dictionary assigning to the vertices of each `\tau`
+        the value `M_\tau` as a rational function in `s`.
+
+        EXAMPLES::
+
+            sage: R.<x,y> = QQ[]
+            sage: f = y^7 + x^2 * y^5 + x^5 * y^3
+            sage: zex = ZetaFunctions(f)
+            sage: zex.Mtaus()
+            {(A vertex at (0, 7),): -t^7 + 1,
+             (A vertex at (0, 7), A vertex at (2, 5)): -t^7 + 1,
+             (A vertex at (2, 5),): 1,
+             (A vertex at (2, 5), A vertex at (5, 3)): -t^19 + 1,
+             (A vertex at (5, 3),): 1}
+        """
+        return {tuple(tau.vertices()): Mtau(tau)
+                for tau in compact_faces(self._Gammaf)}
+
+    def Jtaus(self, ring_s, weights=None):
+        r"""
+        Return a dictionary assigning to the vertices of each `\tau`
+        the value `M_\tau` as a rational function in `s`.
+
+        EXAMPLES::
+
+            sage: R.<x,y> = QQ[]
+            sage: S.<s> = QQ[]
+            sage: f = y^7 + x^2 * y^5 + x^5 * y^3
+            sage: zex = ZetaFunctions(f)
+            sage: zex.Jtaus(S)
+            {(A vertex at (0, 7),): (1/7) * (s + 2/7)^-1,
+             (A vertex at (0, 7), A vertex at (2, 5)): (1/7) * (s + 2/7)^-1,
+             (A vertex at (2, 5),): (1/133) * (s + 5/19)^-1 * (s + 2/7)^-1,
+             (A vertex at (2, 5), A vertex at (5, 3)): (1/19) * (s + 5/19)^-1,
+             (A vertex at (5, 3),): (2/57) * (s + 5/19)^-1 * (s + 1/3)^-1}
+        """
+        return {tuple(tau.vertices()): Jtau(tau, weights, ring_s)[0]
+                for tau in compact_faces(self._Gammaf)}
+
 # ------------------------AUXILIARY FUNCTIONS------------------------
 
 
@@ -956,8 +998,8 @@ def faces(P):
 
     EXAMPLES::
 
-        sage: x,y,z = polygens(QQ,'x,y,z')
-        sage: f1 = x**3+y**3+z**4
+        sage: R.<x, y, z> = QQ[]
+        sage: f1 = x^3 + y^3 + z^4
         sage: P = newton_polyhedron(f1)
         sage: faces(P)
         Finite lattice containing 15 elements
@@ -972,8 +1014,8 @@ def proper_faces(P):
 
     EXAMPLES::
 
-        sage: x,y,z = polygens(QQ,'x,y,z')
-        sage: f1 = x**3+y**3+z**4
+        sage: R.<x, y, z> = QQ[]
+        sage: f1 = x^3 + y^3 + z^4
         sage: P = newton_polyhedron(f1)
         sage: proper_faces(P)
         [A 0-dimensional face of a Polyhedron in QQ^3 defined
@@ -1014,8 +1056,8 @@ def compact_faces(P):
 
     EXAMPLES::
 
-        sage: x,y,z = polygens(QQ,'x,y,z')
-        sage: f1 = x**3+y**3+z**4
+        sage: R.<x, y, z> = QQ[]
+        sage: f1 = x^3 + y^3 + z^4
         sage: P = newton_polyhedron(f1)
         sage: compact_faces(P)
         [A 0-dimensional face of a Polyhedron in QQ^3 defined
@@ -1178,7 +1220,7 @@ def simplicial_partition(cone):
 
     EXAMPLES::
 
-        sage: x,y,z = polygens(QQ,'x,y,z')
+        sage: R.<x, y, z> = QQ[]
         sage: g = x*y + z^3
         sage: P = newton_polyhedron(g)
         sage: tau = compact_faces(P)[0]
@@ -1420,7 +1462,8 @@ def Ntau(f, tau, p):
     Return the number
 
     .. math::
-        N_{\tau} = \#\{a\in(\mathbb{F}_p - 0)^d \mid f^*_{\tau}(a)=0\}
+        N_{\tau} = \#\{a\in(\mathbb{F}_p \setminus \{0\})^d
+        \mid f^*_{\tau}(a)=0\}
 
     with `f^*_{\tau}=\mathbb{F}_p(f_{\tau})`
     for a given face `\tau` and `p` a given prime number (see [DH01]_).
@@ -1481,7 +1524,7 @@ def Ltau(f, tau, p, abs_Ntau, s):
 
 def Lgamma(f, p, abs_Ngamma, s):
     r"""
-    Return the value `N_{\tau}` for the total polyhedron `\Gamma` in
+    Return the value `L_{\Gamma}` for the total polyhedron `\Gamma` in
     terms of a symbolic variable `s`.
 
     ``abs_Ngamma`` is the corresponding ``Ngamma`` value for abstract
@@ -1510,13 +1553,25 @@ def Lgamma(f, p, abs_Ngamma, s):
     return p ** (-n) * u
 
 
-def Stau(f, P, tau, p, weights, s):
+def Stau(f, tau, p, weights, s):
     r"""
     Return a list ``[S_tau, cone_info]`` with ``cone_info`` containing
     a string of information about the cones, simplicial partition,
     multiplicity and integral points (see [DH01]_).
 
     Value ``S_tau`` is expressed in terms of a symbolic variable ``s``.
+
+    EXAMPLES::
+
+        sage: R.<x,y,z> = QQ[]
+        sage: f = x^2 - y^2 + z^3
+        sage: P = newton_polyhedron(f)
+        sage: p, s = var('p, s')
+        sage: r = Stau(f, P.faces(1)[0], p, 3 * [1], s)[0]
+        sage: bool(r == 1/((p - 1)*(p^(6*s + 8) - 1)))
+        True
+        sage: Stau(f, P.faces(1)[0], 7, 3 * [1], s)[0]
+        1/6/(7^(6*s + 8) - 1)
     """
     c = cone_from_face(tau)
     F = simplicial_partition(c)
@@ -1525,9 +1580,9 @@ def Stau(f, P, tau, p, weights, s):
         num = 0
         den = 1
         for h in integral_vectors(scone):
-            num += p ** (sigma_vect(h, weights) + m_vect(h, P) * s)
+            num += p ** (sigma_vect(h, weights) + m_vect(h, tau) * s)
         for a in primitive_vectors_cone(scone):
-            den *= (p ** (sigma_vect(a, weights) + m_vect(a, P) * s) - 1)
+            den *= (p ** (sigma_vect(a, weights) + m_vect(a, tau) * s) - 1)
         result += num / den
         # result = factor(simplify(expand(result + num/den)))
     info = cone_info_output(c, F) + "\n" + "multiplicities = "
@@ -1538,27 +1593,26 @@ def Stau(f, P, tau, p, weights, s):
 
 # TOPOLOGICAL ZETA FUNCTION
 # Calculation of the expression Jtau defined in paper [DL92]
-def Jtau(tau, P, weights, s_ring):
+def Jtau(tau, weights, ring_s):
     r"""
     Return a list ``[J_tau, cone_info]`` with ``cone_info`` containing a
     string of information about the cones, simplicial partition,
     multiplicity and integral points. (see [DL92]_)
 
-    Value J_tau is defined in terms of a symbolic variable ``s``.
+    Value ``J_tau`` is a rational function in ``s``.
 
     EXAMPLES::
 
         sage: R.<x,y,z> = QQ[]
         sage: f=x^2 + y*z
-        sage: s = var('s')
+        sage: S.<s> = QQ[]
         sage: P=newton_polyhedron(f)
         sage: faces_set = proper_faces(P)
         sage: faces_set = face_divisors(1, faces_set)
-        sage: Jtau(faces_set[1], P, None, s)[0]
+        sage: Jtau(faces_set[1], None, S)[0]
         (1/2) * (s + 3/2)^-2 * (s + 5/2)
     """
-    s_ring = PolynomialRing(QQ, 's')
-    s = s_ring.gen(0)
+    s = ring_s.gen(0)
     c = cone_from_face(tau)
     dim_cone = c.dim()
     F = simplicial_partition(c)
@@ -1585,7 +1639,7 @@ def Jtau(tau, P, weights, s_ring):
 def Mtau(tau):
     r"""
     Return the value `M_{\tau}` (the monodromy zeta factor associated
-    to a face) for `\tau` a face in `P` in terms of a symbolic variable `s`.
+    to a face) for `\tau` a face in `P` as a polynomial in `t`.
 
     INPUT:
 
@@ -1606,8 +1660,6 @@ def Mtau(tau):
         sage: [Mtau(tau) for tau in compact_faces(P)]
         [-t^3 + 1, 1, 1]
     """
-    P = tau.polyhedron()
-
     ring_t = PolynomialRing(QQ, 't')
     t = ring_t.gen(0)
     ring_s = PolynomialRing(QQ, 's')
@@ -1622,7 +1674,7 @@ def Mtau(tau):
             mult = multiplicity(scone)
             den = ring_s.one()
             for a in primitive_vectors_cone(scone):
-                den *= (m_vect(a, P) * s + sum(a))
+                den *= (m_vect(a, tau) * s + sum(a))
             if den.degree() == 1:
                 M = s * den.subs(s=~s)
                 result *= (1 - t ** (M.subs(s=0) / mult))
